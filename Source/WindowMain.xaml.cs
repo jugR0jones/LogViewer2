@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.IO;
 using System.Threading;
 using System.Windows;
@@ -20,8 +19,6 @@ namespace LogViewer2
         private CancellationTokenSource cancellationTokenSource;
         private WaitCursor waitCursor;
         private bool processing;
-        private Color highlightColour = Color.Lime;
-        private Color contextColour = Color.LightGray;
         private Configuration configuration;
 
         #endregion
@@ -48,15 +45,10 @@ namespace LogViewer2
         {
             string errorMessage;
             
-            configuration = TomlUtilities.LoadConfiguration(configurationFilename, out errorMessage);
+            configuration = ConfigurationUtilities.LoadConfigurationFromFile(configurationFilename, out errorMessage);
             if(configuration == null)
             {
                 MessageBox.Show(errorMessage, Application.ResourceAssembly.GetName().Name, MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-            else
-            {
-                this.highlightColour = configuration.GetHighlightColour();
-                this.contextColour = configuration.GetContextColour();
             }
 
             mnuFileOpen.IsEnabled = true;

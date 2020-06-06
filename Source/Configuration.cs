@@ -1,78 +1,37 @@
 ﻿using System;
 using System.IO;
-using System.Drawing;
 using Nett;
 using LogViewer2.Utilities;
+using System.Drawing;
 
 namespace LogViewer2
 {
+    public class TomlConfiguration
+    {
+        public string HighlightColour { get; set; }
+        public string ContextColour { get; set; }
+        public int MultiSelectLimit { get; set; }
+        public int NumContextLines { get; set; }
+    }
+
     //TODO: The configuration needs to be rewritten so that highlightColour is a Color and not a string
     public class Configuration
     {
         #region Public Properties
 
-        public string HighlightColour { get; set; } = "Lime";
-        public string ContextColour { get; set; } = "LightGray";
-        public int MultiSelectLimit { get; set; } = 1000;
-        public int NumContextLines { get; set; } = 0;
+        public Color HighlightColour;
+        public Color ContextColour;
+        public int MultiSelectLimit;
+        public int NumContextLines;
 
         #endregion
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns></returns>
-        public Color GetHighlightColour()
-        {
-            Color temp = Color.FromName(this.HighlightColour);
-            if (temp.IsKnownColor == false)
-            {
-                return Color.Lime;
-            }
-
-            return temp;
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns></returns>
-        public Color GetContextColour()
-        {
-            Color temp = Color.FromName(this.ContextColour);
-            if (temp.IsKnownColor == false)
-            {
-                return Color.LightGray;
-            }
-
-            return temp;
-        }
-
-        public void Validate()
-        {
-            if (MultiSelectLimit > 10000)
-            {
-                MultiSelectLimit = 10000;
-
-                Console.WriteLine("[WARNING] ValidateConfiguration: The multiselect limit is 10000");
-            }
-
-            if (NumContextLines > 10)
-            {
-                NumContextLines = 10;
-
-                Console.WriteLine("[WARNING] ValidateConfiguration: The maximum number of context lines is 10");
-            }
-        }
     }
 
     /// <summary>
     /// Allows us to save/load the configuration file to/from TOML
     /// </summary>
-    public class TomlUtilities
+    public class ConfigurationUtilities
     {
-       
-
         #region Public Methods
 
         /// <summary>
@@ -81,7 +40,7 @@ namespace LogViewer2
         /// <param name="configurationFilename">The name of the file to load</param>
         /// <param name="errorMessage">The error message if the method returns FALSE.</param>
         /// <returns>TRUE if the configuration was loaded successfull</returns>
-        public static Configuration LoadConfiguration(string configurationFilename, out string errorMessage)
+        public static Configuration LoadConfigurationFromFile(string configurationFilename, out string errorMessage)
         {
             try
             {
@@ -94,8 +53,8 @@ namespace LogViewer2
                     return null;
                 }
 
-                Configuration configuration = Toml.ReadFile<Configuration>(configurationFilenamePath);
-                configuration.Validate();
+                TomlConfiguration tomlConfiguration = Toml.ReadFile<TomlConfiguration>(configurationFilenamePath);
+                Configuration configuration = ParseTomlConfiguration(tomlConfiguration);
 
                 errorMessage = String.Empty;
 
@@ -159,7 +118,41 @@ namespace LogViewer2
             }
         }
 
-        
+        private static Configuration ParseTomlConfiguration(TomlConfiguration tomlConfiguration)
+        {
+            Configuration configuration = new Configuration
+            {
+                MultiSelectLimit = tomlConfiguration.MultiSelectLimit,
+                NumContextLines = tomlConfiguration.NumContextLines
+            };
+
+            if (configuration.MultiSelectLimit > 10000)
+            {
+                configuration.MultiSelectLimit = 10000;
+
+                Console.WriteLine("[WARNING] ParseTomlConfiguration: The multiselect limit is 10000");
+            }
+
+            if (configuration.NumContextLines > 10)
+            {
+                configuration.NumContextLines = 10;
+
+                Console.WriteLine("[WARNING] ParseTomlConfiguration: The maximum number of context lines is 10");
+            }
+
+            if(ColorUtilities.TryParseColour(tomlConfiguration.HighlightColour, out configuration.HighlightColour) == false)
+            {
+                configuration.HighlightColour = Color.Lime;
+            }
+
+            if(ColorUtilities.TryParseColour(tomlConfiguration.ContextColour, out configuration.ContextColour) == false)
+            {
+                configuration.ContextColour = Color.LightGray;
+            }
+
+            return configuration;
+        }
+
         #endregion
     }
 }

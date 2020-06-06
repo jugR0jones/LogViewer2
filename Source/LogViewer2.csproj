@@ -76,6 +76,7 @@
     <Compile Include="ControlLog.xaml.cs">
       <DependentUpon>ControlLog.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Utilities\ColorUtilities.cs" />
     <Compile Include="Utilities\FileUtilities.cs" />
     <Compile Include="WaitCursor.cs" />
     <Compile Include="WindowConfiguration.xaml.cs">
