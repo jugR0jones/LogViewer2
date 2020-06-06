@@ -55,35 +55,13 @@ namespace LogViewer2
         #endregion
 
         #region Menu Event Handlers
+       
         /// <summary>
-        /// 
+        /// Display the load file dialog and open the selected file.
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void MnuFileOpenNew_Click(object sender, RoutedEventArgs e)
-        {
-            //LoadFile("access.log.txt", true);
-            //LoadFile("access_log2", true);
-
-            OpenFileDialog openFileDialog = new OpenFileDialog();
-            openFileDialog.Filter = "All Files|*.*";
-            openFileDialog.FileName = "*.*";
-            openFileDialog.Title = "Select log file";
-
-            if (openFileDialog.ShowDialog(this) == false)
-            {
-                return;
-            }
-
-            LoadFile(openFileDialog.FileName, true);
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void MnuFileOpen_Click(object sender, RoutedEventArgs e)
+        private void OnFileOpenClickHandler(object sender, RoutedEventArgs e)
         {
             //LoadFile("access.log.txt", false);
 
@@ -470,7 +448,6 @@ namespace LogViewer2
         {
             Dispatcher.Invoke(() =>
             {
-                mnuFileOpenNew.IsEnabled = enabled;
                 mnuFileOpen.IsEnabled = enabled;
                 mnuFileClose.IsEnabled = enabled;
                 mnuFileExit.IsEnabled = enabled;

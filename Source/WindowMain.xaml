@@ -18,8 +18,7 @@
 
         <Menu Grid.Row="0"  Height="Auto" Width="Auto" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch" Margin="0,0,0,0"  >
             <MenuItem Header="File">
-                <MenuItem x:Name="mnuFileOpenNew" Header="_New" Click="MnuFileOpenNew_Click"/>
-                <MenuItem x:Name="mnuFileOpen" Header="_Open" Click="MnuFileOpen_Click"/>
+                <MenuItem x:Name="mnuFileOpen" Header="_Open" Click="OnFileOpenClickHandler"/>
                 <MenuItem x:Name="mnuFileClose" Header="_Close" Click="MnuFileClose_Click"/>
                 <MenuItem x:Name="mnuFileExit" Header="_Exit" Click="MnuFileExit_Click"/>
             </MenuItem>
