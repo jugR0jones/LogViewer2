@@ -15,38 +15,49 @@ namespace LogViewer2
     /// </summary>
     public partial class WindowMain : Window
     {
+        #region Private Variables
+
         private CancellationTokenSource cancellationTokenSource;
         private WaitCursor waitCursor;
         private bool processing;
         private Color highlightColour = Color.Lime;
         private Color contextColour = Color.LightGray;
-        private Configuration config;
+        private Configuration configuration;
 
-        #region Window Event Handlers
-        /// <summary>
-        /// Constructor
-        /// </summary>
+        #endregion
+
+        #region Constants
+
+        private const string configurationFilename = "LogViewer.toml";
+
+        #endregion
+
         public WindowMain()
         {
             InitializeComponent();
         }
 
+        #region Window Event Handlers
+
         /// <summary>
-        /// 
+        /// Run when the window has loaded
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void Window_Loaded(object sender, RoutedEventArgs e)
+        private void OnWindowLoaded(object sender, RoutedEventArgs e)
         {
-            this.config = new Configuration();
-            string ret = this.config.Load();
-            if (ret.Length > 0)
+            string errorMessage;
+            
+            configuration = TomlUtilities.LoadConfiguration(configurationFilename, out errorMessage);
+            if(configuration == null)
             {
-                MessageBox.Show(ret, Application.ResourceAssembly.GetName().Name, MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(errorMessage, Application.ResourceAssembly.GetName().Name, MessageBoxButton.OK, MessageBoxImage.Error);
             }
-
-            this.highlightColour = config.GetHighlightColour();
-            this.contextColour = config.GetContextColour();
+            else
+            {
+                this.highlightColour = configuration.GetHighlightColour();
+                this.contextColour = configuration.GetContextColour();
+            }
 
             mnuFileOpen.IsEnabled = true;
             mnuFileClose.IsEnabled = false;
@@ -101,7 +112,7 @@ namespace LogViewer2
         /// <param name="e"></param>
         private void MnuToolsConfiguration_Click(object sender, RoutedEventArgs e)
         {
-            WindowConfiguration wc = new WindowConfiguration(this.config);
+            WindowConfiguration wc = new WindowConfiguration(this.configuration);
             // Hack to set owner from a user control?!
             HwndSource source = HwndSource.FromVisual(this) as HwndSource;
             if (source != null)
@@ -178,33 +189,33 @@ namespace LogViewer2
 
             if (newTab == true)
             {
-                ControlLog cl = new ControlLog(this.config)
+                ControlLog controlLog = new ControlLog(this.configuration)
                 {                   
                     ViewMode = Global.ViewMode.Standard,                   
                 };
 
-                cl.ProgressUpdate += LogFile_LoadProgress;
-                cl.LoadComplete += LogFile_LoadComplete;
-                cl.SearchComplete += LogFile_SearchComplete;
-                cl.ExportInitiated += LogFile_ExportInitiated;
-                cl.ExportComplete += LogFile_ExportComplete; ;
-                cl.LoadError += LogFile_LoadError;
-                cl.MultiSearchInitiated += LogFile_MultiSearchInitiated;
-                cl.DragEnter += LogFile_DragEnter;
-                cl.Drop += LogFile_Drop;
+                controlLog.ProgressUpdate += LogFile_LoadProgress;
+                controlLog.LoadComplete += LogFile_LoadComplete;
+                controlLog.SearchComplete += LogFile_SearchComplete;
+                controlLog.ExportInitiated += LogFile_ExportInitiated;
+                controlLog.ExportComplete += LogFile_ExportComplete; ;
+                controlLog.LoadError += LogFile_LoadError;
+                controlLog.MultiSearchInitiated += LogFile_MultiSearchInitiated;
+                controlLog.DragEnter += LogFile_DragEnter;
+                controlLog.Drop += LogFile_Drop;
                 
-                TabItem ti = new TabItem
+                TabItem tabItem = new TabItem
                 {
-                    Content = cl,
+                    Content = controlLog,
                     Header = Path.GetFileName(filePath),
-                    Tag = cl.Guid,
+                    Tag = controlLog.Guid,
                     ToolTip = filePath
                 };
 
-                tabMain.Items.Add(ti);
+                tabMain.Items.Add(tabItem);
                 tabMain.SelectedIndex = tabMain.Items.Count - 1;
                 
-                cl.Load(filePath, cancellationTokenSource.Token);
+                controlLog.Load(filePath, cancellationTokenSource.Token);
             }
             else
             {
@@ -245,7 +256,7 @@ namespace LogViewer2
 
             SetProcessingState(false);
             this.cancellationTokenSource = new CancellationTokenSource();
-            cl.Search(sc, (bool)toolBtnCumulative.IsChecked, cancellationTokenSource.Token, config.NumContextLines);
+            cl.Search(sc, (bool)toolBtnCumulative.IsChecked, cancellationTokenSource.Token, configuration.NumContextLines);
         }
         #endregion
 
@@ -289,7 +300,7 @@ namespace LogViewer2
             this.cancellationTokenSource = new CancellationTokenSource();
             SetProcessingState(false);
             
-            cl.SearchMulti(searches, cancellationTokenSource.Token, config.NumContextLines);
+            cl.SearchMulti(searches, cancellationTokenSource.Token, configuration.NumContextLines);
         }
 
         /// <summary>
@@ -436,8 +447,9 @@ namespace LogViewer2
         #endregion
 
         #region UI Methods
+
         /// <summary>
-        /// 
+        /// Disable or enable components while an operation is in progress.
         /// </summary>
         /// <param name="enabled"></param>
         private void SetProcessingState(bool enabled)
@@ -447,7 +459,6 @@ namespace LogViewer2
                 mnuFileOpen.IsEnabled = enabled;
                 mnuFileClose.IsEnabled = enabled;
                 mnuFileExit.IsEnabled = enabled;
-                //menuToolsMultiStringSearch.IsEnabled = enabled;
                 toolBtnCumulative.IsEnabled = enabled;
                 toolBtnSearch.IsEnabled = enabled;
 
@@ -462,8 +473,7 @@ namespace LogViewer2
                     this.waitCursor = new WaitCursor();
                     this.processing = true;
                     statusProgressBar.Visibility = Visibility.Visible;
-                }              
-                
+                }
             });
         }
 
@@ -501,7 +511,7 @@ namespace LogViewer2
 
         private OpenFileDialog CreateOpenFileDialogForLogFiles()
         {
-             OpenFileDialog openFileDialog = new OpenFileDialog();
+            OpenFileDialog openFileDialog = new OpenFileDialog();
             openFileDialog.Filter = "All Files|*.*";
             openFileDialog.FileName = "*.*";
             openFileDialog.Title = "Select log file";

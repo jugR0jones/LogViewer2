@@ -71,12 +71,12 @@
     <Compile Include="Configuration.cs" />
     <Compile Include="Global.cs" />
     <Compile Include="LogLine.cs" />
-    <Compile Include="Methods.cs" />
     <Compile Include="SearchCriteria.cs" />
     <Compile Include="Searches.cs" />
     <Compile Include="ControlLog.xaml.cs">
       <DependentUpon>ControlLog.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Utilities\FileUtilities.cs" />
     <Compile Include="WaitCursor.cs" />
     <Compile Include="WindowConfiguration.xaml.cs">
       <DependentUpon>WindowConfiguration.xaml</DependentUpon>
@@ -151,6 +151,7 @@
     </EmbeddedResource>
     <None Include="LogViewer.toml">
       <SubType>Component</SubType>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">

@@ -2,101 +2,21 @@
 using System.IO;
 using System.Drawing;
 using Nett;
+using LogViewer2.Utilities;
 
 namespace LogViewer2
 {
-    /// <summary>
-    /// Allows us to save/load the configuration file to/from TOML
-    /// </summary>
+    //TODO: The configuration needs to be rewritten so that highlightColour is a Color and not a string
     public class Configuration
     {
-        #region Member Variables
+        #region Public Properties
+
         public string HighlightColour { get; set; } = "Lime";
         public string ContextColour { get; set; } = "LightGray";
         public int MultiSelectLimit { get; set; } = 1000;
         public int NumContextLines { get; set; } = 0;
-        private const string FILENAME = "LogViewer.toml";
+
         #endregion
-
-        #region Public Methods
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns></returns>
-        public string Load()
-        {
-            try
-            {
-                if (File.Exists(this.GetPath()) == false)
-                {
-                    return string.Empty;
-                }
-
-                Configuration c = Toml.ReadFile<Configuration>(this.GetPath());
-                this.HighlightColour = c.HighlightColour;
-                this.ContextColour = c.ContextColour;
-                this.MultiSelectLimit = c.MultiSelectLimit;
-                this.NumContextLines = c.NumContextLines;
-
-                if (this.MultiSelectLimit > 10000)
-                {
-                    this.MultiSelectLimit = 10000;
-                    return "The multiselect limit is 10000";
-                }
-
-                if (this.NumContextLines > 10)
-                {
-                    this.NumContextLines = 10;
-                    return "The maximum number of context lines is 10";
-                }
-                return string.Empty;
-            }
-            catch (FileNotFoundException fileNotFoundEx)
-            {
-                return fileNotFoundEx.Message;
-            }
-            catch (UnauthorizedAccessException unauthAccessEx)
-            {
-                return unauthAccessEx.Message;
-            }
-            catch (IOException ioEx)
-            {
-                return ioEx.Message;
-            }
-            catch (Exception ex)
-            {
-                return ex.Message;
-            }
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns></returns>
-        public string Save()
-        {
-            try
-            {
-                Toml.WriteFile(this, this.GetPath());
-                return string.Empty;
-            }
-            catch (FileNotFoundException fileNotFoundEx)
-            {
-                return fileNotFoundEx.Message;
-            }
-            catch (UnauthorizedAccessException unauthAccessEx)
-            {
-                return unauthAccessEx.Message;
-            }
-            catch (IOException ioEx)
-            {
-                return ioEx.Message;
-            }
-            catch (Exception ex)
-            {
-                return ex.Message;
-            }
-        }
 
         /// <summary>
         /// 
@@ -127,17 +47,119 @@ namespace LogViewer2
 
             return temp;
         }
-        #endregion
 
-        #region Misc Methods
+        public void Validate()
+        {
+            if (MultiSelectLimit > 10000)
+            {
+                MultiSelectLimit = 10000;
+
+                Console.WriteLine("[WARNING] ValidateConfiguration: The multiselect limit is 10000");
+            }
+
+            if (NumContextLines > 10)
+            {
+                NumContextLines = 10;
+
+                Console.WriteLine("[WARNING] ValidateConfiguration: The maximum number of context lines is 10");
+            }
+        }
+    }
+
+    /// <summary>
+    /// Allows us to save/load the configuration file to/from TOML
+    /// </summary>
+    public class TomlUtilities
+    {
+       
+
+        #region Public Methods
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="configurationFilename">The name of the file to load</param>
+        /// <param name="errorMessage">The error message if the method returns FALSE.</param>
+        /// <returns>TRUE if the configuration was loaded successfull</returns>
+        public static Configuration LoadConfiguration(string configurationFilename, out string errorMessage)
+        {
+            try
+            {
+                string configurationFilenamePath = FileUtilities.GetPathForFilename(configurationFilename);
+
+                if (File.Exists(configurationFilenamePath) == false)
+                {
+                    errorMessage = $"Configuration file '{configurationFilenamePath}' not found.";
+                    
+                    return null;
+                }
+
+                Configuration configuration = Toml.ReadFile<Configuration>(configurationFilenamePath);
+                configuration.Validate();
+
+                errorMessage = String.Empty;
+
+                return configuration;
+            }
+            catch (FileNotFoundException exception)
+            {
+                errorMessage = exception.Message;
+                
+                return null;
+            }
+            catch (UnauthorizedAccessException exception)
+            {
+                errorMessage =  exception.Message;
+                
+                return null;
+            }
+            catch (IOException exception)
+            {
+                errorMessage =  exception.Message;
+
+                return null;
+            }
+            catch (Exception exception)
+            {
+                errorMessage =  exception.Message;
+
+                return null;
+            }
+        }
+
         /// <summary>
         /// 
         /// </summary>
         /// <returns></returns>
-        private string GetPath()
+        public string Save(Configuration configuration, string configurationFilename)
         {
-            return System.IO.Path.Combine(Methods.GetApplicationDirectory(), FILENAME);
+            try
+            {
+                string configurationFilenamePath = FileUtilities.GetPathForFilename(configurationFilename);
+
+                Toml.WriteFile(configuration, configurationFilenamePath);
+
+                return string.Empty;
+            }
+            catch (FileNotFoundException fileNotFoundEx)
+            {
+                return fileNotFoundEx.Message;
+            }
+            catch (UnauthorizedAccessException unauthAccessEx)
+            {
+                return unauthAccessEx.Message;
+            }
+            catch (IOException ioEx)
+            {
+                return ioEx.Message;
+            }
+            catch (Exception ex)
+            {
+                return ex.Message;
+            }
         }
+
+        
         #endregion
     }
 }
