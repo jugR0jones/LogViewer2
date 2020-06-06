@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Data;
 using System.Windows.Interop;
+using LogViewer2.DataTypes;
 
 namespace LogViewer2
 {

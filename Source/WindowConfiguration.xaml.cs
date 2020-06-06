@@ -1,4 +1,5 @@
 ﻿using System.Windows;
+using LogViewer2.DataTypes;
 
 namespace LogViewer2
 {

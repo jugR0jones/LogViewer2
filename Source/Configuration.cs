@@ -3,30 +3,10 @@ using System.IO;
 using Nett;
 using LogViewer2.Utilities;
 using System.Drawing;
+using LogViewer2.DataTypes;
 
 namespace LogViewer2
 {
-    public class TomlConfiguration
-    {
-        public string HighlightColour { get; set; }
-        public string ContextColour { get; set; }
-        public int MultiSelectLimit { get; set; }
-        public int NumContextLines { get; set; }
-    }
-
-    //TODO: The configuration needs to be rewritten so that highlightColour is a Color and not a string
-    public class Configuration
-    {
-        #region Public Properties
-
-        public Color HighlightColour;
-        public Color ContextColour;
-        public int MultiSelectLimit;
-        public int NumContextLines;
-
-        #endregion
-    }
-
     /// <summary>
     /// Allows us to save/load the configuration file to/from TOML
     /// </summary>
@@ -42,48 +22,16 @@ namespace LogViewer2
         /// <returns>TRUE if the configuration was loaded successfull</returns>
         public static Configuration LoadConfigurationFromFile(string configurationFilename, out string errorMessage)
         {
-            try
+            TomlConfiguration tomlConfiguration = TomlUtilities.LoadConfigurationFromFile(configurationFilename, out errorMessage);
+            if(tomlConfiguration == null)
             {
-                string configurationFilenamePath = FileUtilities.GetPathForFilename(configurationFilename);
-
-                if (File.Exists(configurationFilenamePath) == false)
-                {
-                    errorMessage = $"Configuration file '{configurationFilenamePath}' not found.";
-                    
-                    return null;
-                }
-
-                TomlConfiguration tomlConfiguration = Toml.ReadFile<TomlConfiguration>(configurationFilenamePath);
-                Configuration configuration = ParseTomlConfiguration(tomlConfiguration);
-
-                errorMessage = String.Empty;
-
-                return configuration;
-            }
-            catch (FileNotFoundException exception)
-            {
-                errorMessage = exception.Message;
-                
                 return null;
             }
-            catch (UnauthorizedAccessException exception)
-            {
-                errorMessage =  exception.Message;
-                
-                return null;
-            }
-            catch (IOException exception)
-            {
-                errorMessage =  exception.Message;
 
-                return null;
-            }
-            catch (Exception exception)
-            {
-                errorMessage =  exception.Message;
+            errorMessage = String.Empty;
+            Configuration configuration = FromTomlConfiguration(tomlConfiguration);
 
-                return null;
-            }
+            return configuration;
         }
 
         /// <summary>
@@ -118,7 +66,7 @@ namespace LogViewer2
             }
         }
 
-        private static Configuration ParseTomlConfiguration(TomlConfiguration tomlConfiguration)
+        private static Configuration FromTomlConfiguration(TomlConfiguration tomlConfiguration)
         {
             Configuration configuration = new Configuration
             {

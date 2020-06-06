@@ -69,6 +69,8 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Configuration.cs" />
+    <Compile Include="DataTypes\Configuration.cs" />
+    <Compile Include="DataTypes\TomlConfiguration.cs" />
     <Compile Include="Global.cs" />
     <Compile Include="LogLine.cs" />
     <Compile Include="SearchCriteria.cs" />
@@ -78,6 +80,7 @@
     </Compile>
     <Compile Include="Utilities\ColorUtilities.cs" />
     <Compile Include="Utilities\FileUtilities.cs" />
+    <Compile Include="Utilities\TomlUtilities.cs" />
     <Compile Include="WaitCursor.cs" />
     <Compile Include="WindowConfiguration.xaml.cs">
       <DependentUpon>WindowConfiguration.xaml</DependentUpon>
