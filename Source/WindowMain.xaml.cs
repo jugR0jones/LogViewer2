@@ -48,7 +48,7 @@ namespace LogViewer2
             this.highlightColour = config.GetHighlightColour();
             this.contextColour = config.GetContextColour();
 
-            mnuFileOpen.IsEnabled = false;
+            mnuFileOpen.IsEnabled = true;
             mnuFileClose.IsEnabled = false;
             toolBtnSearch.IsEnabled = false;
         }
@@ -65,17 +65,13 @@ namespace LogViewer2
         {
             //LoadFile("access.log.txt", false);
 
-            OpenFileDialog openFileDialog = new OpenFileDialog();
-            openFileDialog.Filter = "All Files|*.*";
-            openFileDialog.FileName = "*.*";
-            openFileDialog.Title = "Select log file";
-
+            OpenFileDialog openFileDialog = CreateOpenFileDialogForLogFiles();
             if (openFileDialog.ShowDialog(this) == false)
             {
                 return;
             }
 
-            LoadFile(openFileDialog.FileName, false);
+            LoadFile(openFileDialog.FileName, true);
         }
 
         /// <summary>
@@ -502,5 +498,15 @@ namespace LogViewer2
             SearchFile();
         }
         #endregion        
+
+        private OpenFileDialog CreateOpenFileDialogForLogFiles()
+        {
+             OpenFileDialog openFileDialog = new OpenFileDialog();
+            openFileDialog.Filter = "All Files|*.*";
+            openFileDialog.FileName = "*.*";
+            openFileDialog.Title = "Select log file";
+
+            return openFileDialog;
+        }
     }
 }
